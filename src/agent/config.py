@@ -1,34 +1,30 @@
-"""Configuration management for the Azure AI Study Assistant."""
+"""Configuration management for the AI Study Assistant."""
 
 import os
-from dataclasses import dataclass
 from dotenv import load_dotenv
 
 
-@dataclass(frozen=True)
-class AgentConfig:
-    """Strongly typed configuration values for the agent."""
-
-    project_endpoint: str
-    model_deployment: str
-    agent_id: str
-
-
-def load_config() -> AgentConfig:
-    """Load environment configuration from .env or environment variables."""
+def load_config() -> dict:
+    """Load environment configuration from .env file.
+    
+    Returns:
+        dict: Configuration dictionary with GitHub token.
+        
+    Raises:
+        ValueError: If GITHUB_TOKEN is not set.
+    """
     load_dotenv()
-
-    project_endpoint = os.getenv("PROJECT_ENDPOINT", "")
-    model_deployment = os.getenv("MODEL_DEPLOYMENT", "")
-    agent_id = os.getenv("AGENT_ID", "")
-
-    if not project_endpoint or not model_deployment or not agent_id:
+    
+    github_token = os.getenv("GITHUB_TOKEN", "").strip()
+    
+    if not github_token:
         raise ValueError(
-            "Environment variables PROJECT_ENDPOINT, MODEL_DEPLOYMENT, and AGENT_ID must be set."
+            "GITHUB_TOKEN environment variable must be set. "
+            "Please create a .env file with your GitHub Personal Access Token."
         )
-
-    return AgentConfig(
-        project_endpoint=project_endpoint,
-        model_deployment=model_deployment,
-        agent_id=agent_id,
-    )
+    
+    return {
+        "github_token": github_token,
+        "base_url": "https://models.inference.ai.azure.com",
+        "model": "gpt-4o-mini",
+    }
