@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # Title and description
-st.title("📚 AI Study Assistant")
+st.title("📚 AI Study Assistant 🚀")
 st.markdown("Ask me to create a study plan for any topic, or ask any learning question!")
 
 # Initialize agent in session state
