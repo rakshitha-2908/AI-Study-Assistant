@@ -2,6 +2,39 @@
 
 from openai import OpenAI
 from .agent_client import ConversationHistory
+from .config import SYSTEM_PROMPT as CONFIG_SYSTEM_PROMPT
+
+
+def detect_intent(user_message: str) -> str:
+    msg = user_message.lower()
+    plan_keywords = ["roadmap", "plan", "schedule", "days", "weeks", "curriculum", "learning path"]
+    quiz_keywords = ["quiz", "test me", "interview questions", "practice questions", "give me questions"]
+    teach_keywords = ["teach me", "help me understand", "i don't get", "walk me through"]
+    debug_keywords = ["what's wrong", "why isn't", "fix this", "debug", "review my", "error in"]
+    explain_keywords = ["what is", "what are", "define", "how does", "how do", "explain"]
+    if any(k in msg for k in plan_keywords):
+        return "PLAN"
+    if any(k in msg for k in quiz_keywords):
+        return "QUIZ"
+    if any(k in msg for k in debug_keywords):
+        return "DEBUG"
+    if any(k in msg for k in teach_keywords):
+        return "TEACH"
+    if any(k in msg for k in explain_keywords):
+        return "EXPLAIN"
+    return "GENERAL"
+
+
+def get_intent_instruction(intent: str) -> str:
+    instructions = {
+        "EXPLAIN": "\n[System: EXPLAIN request. Give a direct answer, one example, key points only. No study plans.]",
+        "PLAN":    "\n[System: PLAN request. Generate a detailed structured roadmap.]",
+        "QUIZ":    "\n[System: QUIZ request. Generate questions directly. No explanations unless asked.]",
+        "TEACH":   "\n[System: TEACH request. Use lesson format: concept → intuition → example.]",
+        "DEBUG":   "\n[System: DEBUG request. Identify the issue first, then explain, then show the fix.]",
+        "GENERAL": "",
+    }
+    return instructions.get(intent, "")
 
 
 class StudyAgent:
@@ -11,12 +44,7 @@ class StudyAgent:
     study guidance with multi-turn conversation memory.
     """
     
-    SYSTEM_PROMPT = (
-        "You are an expert educational assistant. Your role is to help students learn effectively. "
-        "When asked about a topic, create comprehensive study plans with clear objectives, key concepts, "
-        "and practice tasks. When asked general questions, provide clear, concise explanations. "
-        "Be encouraging and supportive in your responses."
-    )
+    SYSTEM_PROMPT = CONFIG_SYSTEM_PROMPT
     
     def __init__(self, config: dict) -> None:
         """Initialize the StudyAgent with GitHub Models configuration.
@@ -66,6 +94,10 @@ class StudyAgent:
         Returns:
             The AI assistant's response as a string.
         """
+        intent = detect_intent(user_input)
+        intent_note = get_intent_instruction(intent)
+        user_input = user_input + intent_note
+
         # Create the appropriate prompt
         prompt = self.create_prompt(user_input)
         
