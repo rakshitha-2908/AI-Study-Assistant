@@ -59,30 +59,7 @@ class StudyAgent:
         self._model = config["model"]
         self._conversation_history = ConversationHistory()
     
-    def create_prompt(self, topic: str) -> str:
-        """Create a study prompt for a given topic.
-        
-        Args:
-            topic: The topic to create a study plan for.
-            
-        Returns:
-            A formatted prompt string for the study assistant.
-        """
-        # Detect if input looks like a question vs a topic
-        is_question = any(topic.strip().lower().startswith(q) for q in ["what", "how", "why", "when", "where", "who", "can", "is", "does", "should"])
-        
-        if is_question:
-            return (
-                f"Please answer the following question clearly and concisely: {topic}"
-            )
-        else:
-            return (
-                f"Create a comprehensive study plan for the topic: {topic}. "
-                "Include: learning objectives, key concepts to master, important subtopics, "
-                "and practical exercises or projects to reinforce learning."
-            )
-    
-    def run(self, user_input: str) -> str:
+    def run(self, user_input: str, topic_context: str = "", difficulty: str = "Intermediate") -> str:
         """Process user input and return an AI-generated response.
         
         Maintains multi-turn conversation memory by storing up to 10 recent messages.
@@ -90,23 +67,28 @@ class StudyAgent:
         
         Args:
             user_input: The user's question or topic request.
+            topic_context: Subject-specific context injected into the system prompt.
+            difficulty: Student level — Beginner, Intermediate, or Interview-ready.
             
         Returns:
             The AI assistant's response as a string.
         """
+        # Detect intent and append instruction to user message
         intent = detect_intent(user_input)
         intent_note = get_intent_instruction(intent)
-        user_input = user_input + intent_note
+        augmented_input = user_input + intent_note
 
-        # Create the appropriate prompt
-        prompt = self.create_prompt(user_input)
-        
         # Add user message to history
-        self._conversation_history.add_message("user", prompt)
+        self._conversation_history.add_message("user", augmented_input)
         
+        # Build augmented system prompt with difficulty and topic context
+        difficulty_note = f"\nStudent level: {difficulty}. Adjust explanation depth and vocabulary accordingly."
+        topic_note = f"\n{topic_context}" if topic_context else ""
+        full_system_prompt = self.SYSTEM_PROMPT + difficulty_note + topic_note
+
         # Get conversation history for context
         messages = [
-            {"role": "system", "content": self.SYSTEM_PROMPT}
+            {"role": "system", "content": full_system_prompt}
         ] + self._conversation_history.get_messages()
         
         # Call the API

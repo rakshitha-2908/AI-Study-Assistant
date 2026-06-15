@@ -46,7 +46,49 @@ with st.sidebar:
         - Create a Python learning plan
         """
     )
-    st.markdown("---")
+    TOPIC_CONTEXT = {
+        "General CS": "",
+        "Data Structures & Algorithms": "The student is studying DSA. Always mention time complexity and space complexity. Prioritize interview patterns like sliding window, two pointers, recursion trees.",
+        "Operating Systems": "The student is studying OS. Focus on process management, memory management, CPU scheduling, deadlocks, and synchronization.",
+        "Database Systems": "The student is studying DBMS. Focus on normalization, SQL queries, indexing, transactions, ACID properties.",
+        "System Design": "The student is preparing for system design interviews. Focus on scalability, load balancing, caching, databases, and trade-offs.",
+        "Computer Networks": "The student is studying CN. Focus on OSI model, TCP/IP, HTTP, DNS, sockets, and protocols.",
+        "OOP & Design Patterns": "The student is studying OOP. Focus on SOLID principles, common design patterns with real examples.",
+    }
+
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### Study Settings")
+
+    selected_topic = st.sidebar.selectbox(
+        "Subject",
+        options=list(TOPIC_CONTEXT.keys()),
+        index=0,
+        key="selected_topic"
+    )
+
+    selected_difficulty = st.sidebar.select_slider(
+        "Depth level",
+        options=["Beginner", "Intermediate", "Interview-ready"],
+        value="Intermediate",
+        key="selected_difficulty"
+    )
+
+    st.sidebar.markdown("---")
+
+    st.sidebar.markdown("### Topics Covered")
+    if "topics_covered" not in st.session_state:
+        st.session_state.topics_covered = []
+
+    if st.session_state.topics_covered:
+        for topic in st.session_state.topics_covered[-6:]:
+            st.sidebar.markdown(f"• {topic}")
+    else:
+        st.sidebar.caption("Topics you study will appear here.")
+
+    # persist selections to session state
+    st.session_state.topic = selected_topic
+    st.session_state.difficulty = selected_difficulty
+
     if st.button("🗑️ Clear Chat"):
         st.session_state.messages = []
         if "agent" in st.session_state:
@@ -95,9 +137,21 @@ if prompt := st.chat_input("Type a topic or question..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    # WHERE YOU INSERTED THIS: track topics covered in session
+    if prompt and len(prompt) > 3:
+        topic_label = prompt[:40] + "..." if len(prompt) > 40 else prompt
+        if "topics_covered" not in st.session_state:
+            st.session_state.topics_covered = []
+        if topic_label not in st.session_state.topics_covered:
+            st.session_state.topics_covered.append(topic_label)
+
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = st.session_state.agent.run(prompt)
+            response = st.session_state.agent.run(
+                prompt,
+                topic_context=TOPIC_CONTEXT.get(st.session_state.get("topic", "General CS"), ""),
+                difficulty=st.session_state.get("difficulty", "Intermediate"),
+            )
             st.markdown(response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
