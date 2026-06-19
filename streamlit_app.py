@@ -26,6 +26,28 @@ st.set_page_config(
     layout="wide"
 )
 
+# WHERE YOU INSERTED THIS: custom CSS for improved chat readability
+st.markdown("""
+<style>
+    .stChatMessage {
+        padding: 0.5rem 0;
+    }
+    .stChatMessage p {
+        line-height: 1.6;
+    }
+    .stChatMessage code {
+        font-size: 0.85em;
+    }
+    div[data-testid="stChatMessageContent"] table {
+        font-size: 0.9em;
+    }
+    .stMarkdown h3, .stMarkdown h4 {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Sidebar: professional app info and controls
 with st.sidebar:
     st.header("📚 AI Study Assistant")
