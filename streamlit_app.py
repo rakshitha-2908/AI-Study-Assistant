@@ -3,6 +3,7 @@
 import streamlit as st
 import sys
 import os
+import re
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
@@ -85,6 +86,34 @@ with st.sidebar:
     else:
         st.sidebar.caption("Topics you study will appear here.")
 
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### Quiz Mode")
+
+    if "quiz_active" not in st.session_state:
+        st.session_state.quiz_active = False
+    if "quiz_questions" not in st.session_state:
+        st.session_state.quiz_questions = ""
+    if "quiz_score_history" not in st.session_state:
+        st.session_state.quiz_score_history = []
+    if "quiz_topic" not in st.session_state:
+        st.session_state.quiz_topic = ""
+
+    quiz_topic_input = st.sidebar.text_input("Quiz topic", placeholder="e.g. Binary Search Trees")
+
+    if st.sidebar.button("Generate Quiz", use_container_width=True):
+        if quiz_topic_input.strip():
+            st.session_state.quiz_active = True
+            st.session_state.quiz_topic = quiz_topic_input
+            st.session_state.quiz_questions = ""
+            st.rerun()
+        else:
+            st.sidebar.warning("Enter a topic first")
+
+    if st.session_state.quiz_score_history:
+        st.sidebar.markdown("#### Past Scores")
+        for entry in st.session_state.quiz_score_history[-5:]:
+            st.sidebar.caption(entry)
+
     # persist selections to session state
     st.session_state.topic = selected_topic
     st.session_state.difficulty = selected_difficulty
@@ -128,6 +157,54 @@ with chat_container:
                 st.markdown(message["content"])
     else:
         st.info("Start the conversation by sending a topic or question in the chat input below.")
+
+# Quiz UI: inserted after chat messages loop and before chat input
+if st.session_state.get("quiz_active", False):
+    st.markdown("---")
+    st.markdown(f"### Quiz: {st.session_state.get('quiz_topic', '')}")
+
+    if not st.session_state.quiz_questions:
+        with st.spinner("Generating quiz..."):
+            agent = st.session_state.agent
+            questions = agent.generate_quiz(
+                topic=st.session_state.get("quiz_topic", ""),
+                difficulty=st.session_state.get("difficulty", "Intermediate")
+            )
+            st.session_state.quiz_questions = questions
+
+    st.markdown(st.session_state.quiz_questions)
+
+    user_quiz_answers = st.text_area(
+        "Your answers (number them to match the questions)",
+        height=200,
+        key="quiz_answer_input"
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Submit Answers", use_container_width=True):
+            if user_quiz_answers.strip():
+                with st.spinner("Evaluating..."):
+                    agent = st.session_state.agent
+                    feedback = agent.evaluate_quiz_answers(
+                        topic=st.session_state.get("quiz_topic", ""),
+                        questions=st.session_state.quiz_questions,
+                        user_answers=user_quiz_answers
+                    )
+                    st.markdown("#### Results")
+                    st.markdown(feedback)
+
+                    score_match = re.search(r"Score:\s*(\d+)/(\d+)", feedback)
+                    if score_match:
+                        score_text = f"{st.session_state.get('quiz_topic', '')}: Score: {score_match.group(1)}/{score_match.group(2)}"
+                        st.session_state.quiz_score_history.append(score_text)
+            else:
+                st.warning("Please enter your answers first")
+    with col2:
+        if st.button("Exit Quiz", use_container_width=True):
+            st.session_state.quiz_active = False
+            st.session_state.quiz_questions = ""
+            st.rerun()
 
 st.markdown("---")
 

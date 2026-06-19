@@ -104,6 +104,68 @@ class StudyAgent:
         self._conversation_history.add_message("assistant", assistant_response)
         
         return assistant_response
+
+    def generate_quiz(self, topic: str, difficulty: str = "Intermediate", num_questions: int = 5) -> str:
+        """Generate quiz questions for a given topic.
+        
+        Args:
+            topic: The topic to generate questions about.
+            difficulty: Student level — Beginner, Intermediate, or Interview-ready.
+            num_questions: Number of questions to generate.
+            
+        Returns:
+            The AI-generated quiz questions as a string.
+        """
+        quiz_prompt = (
+            f"Generate exactly {num_questions} quiz questions about: {topic}. "
+            f"Difficulty level: {difficulty}. "
+            "Number each question. Do not include answers or explanations yet. "
+            "Mix conceptual questions with at least one practical/coding question if relevant. "
+            "Keep each question concise."
+        )
+        
+        messages = [
+            {"role": "system", "content": self.SYSTEM_PROMPT},
+            {"role": "user", "content": quiz_prompt}
+        ]
+        
+        response = self._client.chat.completions.create(
+            model=self._model,
+            messages=messages
+        )
+        
+        return response.choices[0].message.content
+
+    def evaluate_quiz_answers(self, topic: str, questions: str, user_answers: str) -> str:
+        """Evaluate user's quiz answers and provide feedback with a score.
+        
+        Args:
+            topic: The original quiz topic.
+            questions: The quiz questions that were asked.
+            user_answers: The user's submitted answers.
+            
+        Returns:
+            Evaluation feedback including a score and corrections.
+        """
+        eval_prompt = (
+            f"Here are quiz questions about {topic}:\n\n{questions}\n\n"
+            f"Here are the student's answers:\n\n{user_answers}\n\n"
+            "Evaluate each answer. For each question, mark it Correct or Incorrect, "
+            "give the correct answer if they got it wrong, and a brief explanation. "
+            "At the end, give a score out of the total questions in the format 'Score: X/Y'."
+        )
+        
+        messages = [
+            {"role": "system", "content": self.SYSTEM_PROMPT},
+            {"role": "user", "content": eval_prompt}
+        ]
+        
+        response = self._client.chat.completions.create(
+            model=self._model,
+            messages=messages
+        )
+        
+        return response.choices[0].message.content
     
     def clear_history(self) -> None:
         """Clear the conversation history for a fresh start."""
