@@ -19,6 +19,19 @@ PROMPT_SUGGESTIONS = [
     "Explain dynamic programming with an example",
 ]
 
+
+def build_export_markdown(messages: list) -> str:
+    """Convert chat history into a downloadable markdown string."""
+    if not messages:
+        return "# Study Session\n\nNo messages yet."
+    
+    lines = ["# AI Study Assistant — Session Notes\n"]
+    for msg in messages:
+        role_label = "You" if msg["role"] == "user" else "Assistant"
+        lines.append(f"## {role_label}\n")
+        lines.append(f"{msg['content']}\n")
+    return "\n".join(lines)
+
 # Page config
 st.set_page_config(
     page_title="AI Study Assistant",
@@ -107,6 +120,17 @@ with st.sidebar:
             st.sidebar.markdown(f"• {topic}")
     else:
         st.sidebar.caption("Topics you study will appear here.")
+
+    # WHERE YOU INSERTED THIS: Export chat as markdown download button (appears before Clear Chat)
+    if st.session_state.get("messages"):
+        export_data = build_export_markdown(st.session_state.messages)
+        st.sidebar.download_button(
+            label="📥 Export Notes",
+            data=export_data,
+            file_name="study_session_notes.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
 
     st.sidebar.markdown("---")
     st.sidebar.markdown("### Quiz Mode")
