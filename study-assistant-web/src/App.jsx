@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createSession } from "./api/client";
 import Sidebar from "./components/Sidebar";
+import ChatArea from "./components/ChatArea";
 
 function App() {
   const [sessionId, setSessionId] = useState(null);
@@ -45,12 +46,15 @@ function App() {
         {/* Sidebar */}
         <Sidebar activeView={activeView} onNavigate={setActiveView} />
 
-        {/* Main chat area placeholder */}
-        <div className="p-6">
-          <p className="text-gray-400 text-sm">
-            Session connected: <span className="font-mono text-xs">{sessionId}</span>
-          </p>
-          <p className="text-gray-400 text-sm mt-2">Chat area goes here</p>
+        {/* Main chat area */}
+        <div className="h-[640px]">
+          <ChatArea
+            sessionId={sessionId}
+            topic={topic}
+            difficulty={difficulty}
+            messages={messages}
+            setMessages={setMessages}
+          />
         </div>
 
         {/* Right rail placeholder */}
