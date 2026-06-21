@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createSession } from "./api/client";
 import Sidebar from "./components/Sidebar";
 import ChatArea from "./components/ChatArea";
+import RightRail from "./components/RightRail";
 
 function App() {
   const [sessionId, setSessionId] = useState(null);
@@ -10,8 +11,10 @@ function App() {
   const [topic, setTopic] = useState("General CS");
   const [difficulty, setDifficulty] = useState("Intermediate");
   const [activeView, setActiveView] = useState("chat");
+  // Tracked here (not yet wired to a quiz UI) so RightRail's Quick Stats
+  // has a real field to read once quiz mode is built. Stays 0 until then.
+  const [quizAttempts, setQuizAttempts] = useState(0);
 
-  // Create a session once when the app first loads.
   useEffect(() => {
     createSession()
       .then(setSessionId)
@@ -20,8 +23,8 @@ function App() {
 
   if (sessionError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-sm">
           <p className="text-red-600 font-medium mb-2">Couldn't connect to the backend.</p>
           <p className="text-sm text-gray-500">{sessionError}</p>
           <p className="text-sm text-gray-500 mt-2">
@@ -34,33 +37,41 @@ function App() {
 
   if (!sessionId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-500">Connecting...</p>
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500 text-sm">Connecting...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex justify-center">
-      <div className="w-full max-w-7xl rounded-3xl overflow-hidden grid grid-cols-[220px_1fr_260px] shadow-sm border border-gray-200 bg-white min-h-[640px]">
-        {/* Sidebar */}
+    <div className="h-screen w-screen flex bg-white overflow-hidden">
+      {/* Sidebar — fixed width, full height */}
+      <div className="w-[260px] flex-shrink-0 h-full">
         <Sidebar activeView={activeView} onNavigate={setActiveView} />
+      </div>
 
-        {/* Main chat area */}
-        <div className="h-[640px]">
-          <ChatArea
-            sessionId={sessionId}
-            topic={topic}
-            difficulty={difficulty}
-            messages={messages}
-            setMessages={setMessages}
-          />
-        </div>
+      {/* Chat area — fills remaining space */}
+      <div className="flex-1 h-full min-w-0">
+        <ChatArea
+          sessionId={sessionId}
+          topic={topic}
+          difficulty={difficulty}
+          messages={messages}
+          setMessages={setMessages}
+        />
+      </div>
 
-        {/* Right rail placeholder */}
-        <div className="bg-gray-50 border-l border-gray-200 p-5">
-          <p className="text-gray-400 text-sm">Right rail goes here</p>
-        </div>
+      {/* Right rail — fixed width, hidden below lg breakpoint */}
+      <div className="w-[320px] flex-shrink-0 h-full hidden lg:block">
+        <RightRail
+          topic={topic}
+          setTopic={setTopic}
+          difficulty={difficulty}
+          setDifficulty={setDifficulty}
+          sessionId={sessionId}
+          messages={messages}
+          quizAttempts={quizAttempts}
+        />
       </div>
     </div>
   );
