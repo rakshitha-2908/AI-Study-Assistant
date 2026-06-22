@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { createSession } from "./api/client";
+import { exportNotes } from "./utils/exportNotes";
 import Sidebar from "./components/Sidebar";
 import ChatArea from "./components/ChatArea";
+import QuizView from "./components/QuizView";
 import RightRail from "./components/RightRail";
 
 function App() {
@@ -43,22 +45,43 @@ function App() {
     );
   }
 
+  function handleExportNotes() {
+    const { blob, filename } = exportNotes(messages, topic);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="h-screen w-screen flex bg-white overflow-hidden">
       {/* Sidebar — fixed width, full height */}
       <div className="w-[260px] flex-shrink-0 h-full">
-        <Sidebar activeView={activeView} onNavigate={setActiveView} />
+        <Sidebar activeView={activeView} onNavigate={setActiveView} onExportNotes={handleExportNotes} />
       </div>
 
-      {/* Chat area — fills remaining space */}
+      {/* Main content area — fills remaining space */}
       <div className="flex-1 h-full min-w-0">
-        <ChatArea
-          sessionId={sessionId}
-          topic={topic}
-          difficulty={difficulty}
-          messages={messages}
-          setMessages={setMessages}
-        />
+        {activeView === "chat" ? (
+          <ChatArea
+            sessionId={sessionId}
+            topic={topic}
+            difficulty={difficulty}
+            messages={messages}
+            setMessages={setMessages}
+          />
+        ) : (
+          <QuizView
+            sessionId={sessionId}
+            topic={topic}
+            difficulty={difficulty}
+            setQuizAttempts={setQuizAttempts}
+          />
+        )}
       </div>
 
       {/* Right rail — fixed width, hidden below lg breakpoint */}
