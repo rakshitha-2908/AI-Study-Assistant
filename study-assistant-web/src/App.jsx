@@ -13,6 +13,7 @@ function App() {
   const [topic, setTopic] = useState("General CS");
   const [difficulty, setDifficulty] = useState("Intermediate");
   const [activeView, setActiveView] = useState("chat");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // Tracked here (not yet wired to a quiz UI) so RightRail's Quick Stats
   // has a real field to read once quiz mode is built. Stays 0 until then.
   const [quizAttempts, setQuizAttempts] = useState(0);
@@ -60,8 +61,18 @@ function App() {
   return (
     <div className="h-screen w-screen flex bg-white overflow-hidden">
       {/* Sidebar — fixed width, full height */}
-      <div className="w-[260px] flex-shrink-0 h-full">
-        <Sidebar activeView={activeView} onNavigate={setActiveView} onExportNotes={handleExportNotes} />
+      <div
+        className={`flex-shrink-0 h-full transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? "w-[72px]" : "w-[260px]"
+        }`}
+      >
+        <Sidebar
+          activeView={activeView}
+          onNavigate={setActiveView}
+          onExportNotes={handleExportNotes}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        />
       </div>
 
       {/* Main content area — fills remaining space */}
