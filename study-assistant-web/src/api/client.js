@@ -1,25 +1,4 @@
-/**
- * All calls to the FastAPI backend live here. Components never call fetch()
- * directly — they import functions from this file. If the backend URL or
- * an endpoint shape changes, this is the only file that needs updating.
- */
-
-const BASE_URL = "http://localhost:8000";
-
-async function postJSON(path, body) {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`${path} failed: ${res.status} ${text}`);
-  }
-  return res.json();
-}
-
-/** Create a new session. Call this once when the app loads. */
+sion. Call this once when the app loads. */
 export async function createSession() {
   const res = await fetch(`${BASE_URL}/session/new`, { method: "POST" });
   if (!res.ok) throw new Error("Failed to create session");
@@ -87,4 +66,25 @@ export async function clearSession(sessionId) {
   const res = await fetch(`${BASE_URL}/session/${sessionId}/clear`, { method: "POST" });
   if (!res.ok) throw new Error("Failed to clear session");
   return res.json();
+}/**
+ * All calls to the FastAPI backend live here. Components never call fetch()
+ * directly — they import functions from this file. If the backend URL or
+ * an endpoint shape changes, this is the only file that needs updating.
+ */
+
+const BASE_URL = "https://ai-study-assistant-nb9m.onrender.com";
+
+async function postJSON(path, body) {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`${path} failed: ${res.status} ${text}`);
+  }
+  return res.json();
 }
+
+/** Create a new ses
