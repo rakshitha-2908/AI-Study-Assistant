@@ -130,7 +130,7 @@ def new_session():
     return NewSessionResponse(session_id=session_id)
 
 
-@@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
     """Send a message to the study agent and get a response.
 
