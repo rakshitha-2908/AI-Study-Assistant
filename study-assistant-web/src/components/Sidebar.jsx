@@ -1,7 +1,6 @@
 import {
   FiMessageSquare,
   FiEdit3,
-  FiClock,
   FiDownload,
   FiMenu,
   FiChevronRight,
@@ -10,7 +9,6 @@ import {
 const NAV_ITEMS = [
   { key: "chat", label: "Chat", icon: FiMessageSquare },
   { key: "quiz", label: "Quiz Mode", icon: FiEdit3 },
-  { key: "topics", label: "Topics Covered", icon: FiClock },
   { key: "export", label: "Export Notes", icon: FiDownload },
 ];
 
@@ -47,9 +45,14 @@ function Sidebar({ activeView, onNavigate, onExportNotes, collapsed, onToggleCol
               onExportNotes?.();
               return;
             }
-            if (key === "topics") {
-              return;
-            }
+            const handleClick = () => {
+  if (key === "export") {
+    onExportNotes?.();
+    return;
+  }
+
+  onNavigate(key);
+};
             onNavigate(key);
           };
 
