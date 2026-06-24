@@ -7,6 +7,7 @@ this file only exposes it over HTTP.
 """
 
 import uuid
+import traceback
 from typing import Dict
 
 from fastapi import FastAPI, HTTPException
@@ -129,22 +130,32 @@ def new_session():
     return NewSessionResponse(session_id=session_id)
 
 
-@app.post("/chat", response_model=ChatResponse)
+@@app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
     """Send a message to the study agent and get a response.
 
     Mirrors StudyAgent.run() exactly — same params, same behavior.
     """
     agent = get_or_create_agent(req.session_id)
+
     try:
         response = agent.run(
             user_input=req.message,
             topic_context=req.topic_context,
             difficulty=req.difficulty,
         )
+
+        return ChatResponse(response=response)
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    return ChatResponse(response=response)
+        print("\n========== CHAT ERROR ==========")
+        traceback.print_exc()
+        print("================================\n")
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 
 @app.post("/quiz/generate", response_model=QuizGenerateResponse)
