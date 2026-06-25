@@ -1,98 +1,144 @@
-# 📚 AI Study Assistant
+# AI Study Assistant
 
-An AI-powered learning companion that generates personalized study plans and answers educational questions using GPT-4o Mini.
+An AI-powered study companion that helps students learn computer science topics through interactive conversations, personalized explanations, study roadmaps, quizzes, and answer evaluation.
 
-## 🚀 Live Demo
+## Live Demo
 
-https://ai-study-assistant-lxzhwtkobdc7fsbzh5r7v9.streamlit.app
-
----
-
-## ✨ Features
-
-* 📖 Generate structured study plans for any topic
-* 🎯 Personalized learning objectives and exercises
-* 💬 Ask follow-up questions with conversation memory
-* 🧠 AI-powered explanations for technical and academic concepts
-* 🌐 Interactive Streamlit web interface
-* ☁️ Cloud deployment using Streamlit Community Cloud
+* Frontend: https://ai-study-assistant-beryl.vercel.app
+* Backend API: https://ai-study-assistant-nb9m.onrender.com
 
 ---
 
-## 🛠️ Tech Stack
+## Features
 
+### Intelligent Study Assistant
+
+* Ask questions about Computer Science topics.
+* Receive concise explanations, detailed lessons, or structured study plans.
+* Multi-turn conversations with context retention.
+
+### Intent-Aware Responses
+
+The assistant automatically detects user intent and adapts its responses:
+
+* Explain Mode
+
+  * Direct explanations with examples.
+* Teach Mode
+
+  * Lesson-style teaching with intuition and examples.
+* Plan Mode
+
+  * Generates structured learning roadmaps.
+* Quiz Mode
+
+  * Creates practice questions and interview-style quizzes.
+* Debug Mode
+
+  * Reviews code and identifies issues.
+
+### Quiz System
+
+* Generate quizzes for any topic.
+* Adjustable difficulty levels.
+* Evaluate submitted answers.
+* Receive feedback and scoring.
+
+### Study Tools
+
+* Topic selection.
+* Difficulty selection.
+* Session management.
+* Export study notes.
+* Conversation history tracking.
+
+---
+
+## Tech Stack
+
+### Frontend
+
+* React
+* Vite
+* Tailwind CSS
+* React Markdown
+
+### Backend
+
+* FastAPI
 * Python
-* Streamlit
-* OpenAI SDK
+* Pydantic
+
+### AI
+
 * GitHub Models
 * GPT-4o Mini
+* OpenAI SDK
+
+### Deployment
+
+* Vercel (Frontend)
+* Render (Backend)
 
 ---
 
-## 📂 Project Structure
+## Architecture
+
+Frontend (React + Vite)
+↓
+FastAPI Backend
+↓
+StudyAgent
+↓
+GitHub Models (GPT-4o Mini)
+
+The frontend communicates with the FastAPI backend, which manages sessions, conversation history, quiz generation, answer evaluation, and AI interactions through GitHub Models.
+
+---
+
+## Project Structure
 
 ```text
 AI-Study-Assistant/
 │
-├── src/
-│   ├── agent/
-│   │   ├── study_agent.py
-│   │   ├── agent_client.py
-│   │   └── config.py
-│   │
-│   └── utils/
-│       └── helpers.py
-│
-├── tests/
-├── docs/
-├── transcripts/
-│
-├── streamlit_app.py
+├── fastapi_main.py
 ├── requirements.txt
-├── README.md
-└── LICENSE
+│
+├── src/
+│   └── agent/
+│       ├── study_agent.py
+│       ├── agent_client.py
+│       └── config.py
+│
+└── study-assistant-web/
+    ├── src/
+    │   ├── components/
+    │   ├── api/
+    │   ├── utils/
+    │   └── App.jsx
+    │
+    └── package.json
 ```
 
 ---
 
-## 💡 Example Prompts
+## Installation
 
-### Study Plan Generation
-
-```text
-Create a 30-day DSA study plan for interview preparation
-```
-
-### Educational Question
-
-```text
-What is binary search?
-```
-
-### Follow-Up Question
-
-```text
-Can you give an example?
-```
-
----
-
-## ⚙️ Installation
-
-### Clone the Repository
+### Backend
 
 ```bash
 git clone https://github.com/rakshitha-2908/AI-Study-Assistant.git
+
 cd AI-Study-Assistant
-```
 
-### Install Dependencies
+python -m venv .venv
 
-```bash
+source .venv/bin/activate
+# Windows:
+# .venv\Scripts\activate
+
 pip install -r requirements.txt
 ```
-
-### Create Environment File
 
 Create a `.env` file:
 
@@ -100,31 +146,103 @@ Create a `.env` file:
 GITHUB_TOKEN=your_github_models_token
 ```
 
-### Run the Application
+Run the backend:
 
 ```bash
-streamlit run streamlit_app.py
+uvicorn fastapi_main:app --reload
+```
+
+Backend URL:
+
+```text
+http://localhost:8000
 ```
 
 ---
 
-## ☁️ Deployment
+### Frontend
 
-This application is deployed on Streamlit Community Cloud and automatically redeploys whenever changes are pushed to GitHub.
+```bash
+cd study-assistant-web
+
+npm install
+
+npm run dev
+```
+
+Frontend URL:
+
+```text
+http://localhost:5173
+```
 
 ---
 
-## 🔮 Future Improvements
+## API Endpoints
 
-* Sidebar controls
-* Clear chat functionality
-* Download study plans
-* Difficulty-level customization
-* Progress tracking dashboard
-* Multiple AI model support
+### Create Session
+
+```http
+POST /session/new
+```
+
+### Chat
+
+```http
+POST /chat
+```
+
+### Generate Quiz
+
+```http
+POST /quiz/generate
+```
+
+### Evaluate Quiz
+
+```http
+POST /quiz/evaluate
+```
+
+### Clear Session
+
+```http
+POST /session/{session_id}/clear
+```
+
+### Health Check
+
+```http
+GET /health
+```
 
 ---
 
-## 📄 License
+## Key Highlights
 
-This project is licensed under the MIT License.
+* Full-stack AI application.
+* Session-based conversation memory.
+* Intent-aware tutoring system.
+* Dynamic quiz generation and evaluation.
+* Production deployment with Vercel and Render.
+* Responsive user interface.
+* Exportable study notes.
+
+---
+
+## Future Improvements
+
+* User authentication.
+* Persistent database storage.
+* PDF study guide generation.
+* Progress tracking dashboard.
+* Flashcard generation.
+* Learning analytics.
+
+---
+
+## Author
+
+Rakshitha Badugu
+
+Built as a full-stack AI learning platform combining modern web development, FastAPI APIs, and Large Language Models to create an interactive study experience.
